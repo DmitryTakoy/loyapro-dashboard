@@ -103,11 +103,13 @@ const Register = () => {
 
     setIsSubmitting(true);
     try {
+      // Добавляем признак подтверждения автоматов
       const requestData = {
         ...formData,
         machines_confirmed: machinesConfirmed
       };
 
+      // Отправляем запрос на регистрацию
       const response = await api.post('/api/auth/register', requestData);
       
       // Don't save token yet since email isn't verified

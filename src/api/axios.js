@@ -56,13 +56,16 @@ api.interceptors.response.use(
       });
     }
 
-    // Only redirect on 401 (Unauthorized), not on 422
-    if (error.response && error.response.status === 401) {
+    // Только для 401 без верифицированного email не делаем редирект
+    if (error.response?.status === 401 && 
+        !error.response.data?.error?.includes('verify') &&
+        !window.location.pathname.includes('/verify-email')) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       
-      if (!window.location.pathname.includes('/verify-email')) {
-        window.location = '/login';
+      // Не делаем автоматический редирект при ошибках логина
+      if (!window.location.pathname.includes('/login')) {
+        window.location.replace('/login');
       }
     }
 

@@ -351,6 +351,18 @@ const LoyaltyProgramDashboard = () => {
   };
   
 
+  useEffect(() => {
+    if (showMassGeneration) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [showMassGeneration]);
+
   return (
     <div
       style={{ backgroundImage: "url('/images/bg1.jpg')" }}
@@ -710,141 +722,165 @@ const LoyaltyProgramDashboard = () => {
       )}           
       {showMassGeneration && (
       <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-        <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-          <h2 className="text-2xl font-semibold mb-4">Mass Code Generation</h2>
-          <form onSubmit={handleMassGeneration} className="space-y-4">
-            {/* Название акции */}
-            <input
-              className="w-full p-2 border border-gray-300 rounded"
-              placeholder="Name (optional)"
-              value={massGenerationData.name}
-              onChange={(e) =>
-                setMassGenerationData((prev) => ({ ...prev, name: e.target.value }))
-              }
-            />
+        {/* Добавляем внешний контейнер со скроллом */}
+        <div className="fixed inset-0 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4">
+            {/* Увеличиваем максимальную ширину и добавляем скролл для контента */}
+            <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl relative">
+              {/* Фиксированный заголовок */}
+              <div className="p-6 border-b border-gray-200">
+                <h2 className="text-2xl font-semibold">Mass Code Generation</h2>
+                {/* Кнопка закрытия в правом верхнем углу */}
+                <button
+                  onClick={() => setShowMassGeneration(false)}
+                  className="absolute right-4 top-4 text-gray-400 hover:text-gray-500"
+                >
+                  <span className="sr-only">Close</span>
+                  ✕
+                </button>
+              </div>
 
-            {/* Количество промо-кодов */}
-            <input
-              className="w-full p-2 border border-gray-300 rounded"
-              type="number"
-              min="1"
-              placeholder="Number of IDs"
-              value={massGenerationData.num_codes}
-              onChange={(e) =>
-                setMassGenerationData((prev) => ({
-                  ...prev,
-                  num_codes: parseInt(e.target.value) || 1,
-                }))
-              }
-            />
+              {/* Скроллируемый контент */}
+              <div className="p-6 max-h-[calc(100vh-16rem)] overflow-y-auto">
+                <form onSubmit={handleMassGeneration} className="space-y-4">
+                  {/* Существующие поля формы */}
+                  <input
+                    className="w-full p-2 border border-gray-300 rounded"
+                    placeholder="Name (optional)"
+                    value={massGenerationData.name}
+                    onChange={(e) =>
+                      setMassGenerationData((prev) => ({ ...prev, name: e.target.value }))
+                    }
+                  />
+                  
+                  {/* Количество промо-кодов */}
+                  <input
+                    className="w-full p-2 border border-gray-300 rounded"
+                    type="number"
+                    min="1"
+                    placeholder="Number of IDs"
+                    value={massGenerationData.num_codes}
+                    onChange={(e) =>
+                      setMassGenerationData((prev) => ({
+                        ...prev,
+                        num_codes: parseInt(e.target.value) || 1,
+                      }))
+                    }
+                  />
 
-            {/* Тип скидки */}
-            <select
-              className="w-full p-2 border border-gray-300 rounded"
-              value={massGenerationData.discount_type}
-              onChange={(e) =>
-                setMassGenerationData((prev) => ({ ...prev, discount_type: e.target.value }))
-              }
-            >
-              <option value="percentage">Percentage Discount</option>
-              <option value="free_drink">Free Drink</option>
-            </select>
+                  {/* Тип скидки */}
+                  <select
+                    className="w-full p-2 border border-gray-300 rounded"
+                    value={massGenerationData.discount_type}
+                    onChange={(e) =>
+                      setMassGenerationData((prev) => ({ ...prev, discount_type: e.target.value }))
+                    }
+                  >
+                    <option value="percentage">Percentage Discount</option>
+                    <option value="free_drink">Free Drink</option>
+                  </select>
 
-            {/* Если Percentage Discount, показываем поле для % */}
-            {massGenerationData.discount_type === 'percentage' && (
-              <input
-                className="w-full p-2 border border-gray-300 rounded"
-                type="number"
-                placeholder="Discount Value (%)"
-                value={massGenerationData.discount_value}
-                onChange={(e) =>
-                  setMassGenerationData((prev) => ({
-                    ...prev,
-                    discount_value: parseInt(e.target.value) || 0,
-                  }))
-                }
-              />
-            )}
+                  {/* Если Percentage Discount, показываем поле для % */}
+                  {massGenerationData.discount_type === 'percentage' && (
+                    <input
+                      className="w-full p-2 border border-gray-300 rounded"
+                      type="number"
+                      placeholder="Discount Value (%)"
+                      value={massGenerationData.discount_value}
+                      onChange={(e) =>
+                        setMassGenerationData((prev) => ({
+                          ...prev,
+                          discount_value: parseInt(e.target.value) || 0,
+                        }))
+                      }
+                    />
+                  )}
 
-            {/* Если Free Drink, показываем поле для кол-ва напитков */}
-            {massGenerationData.discount_type === 'free_drink' && (
-              <input
-                className="w-full p-2 border border-gray-300 rounded"
-                type="number"
-                placeholder="Number of Free Drinks"
-                value={massGenerationData.discount_value}
-                onChange={(e) =>
-                  setMassGenerationData((prev) => ({
-                    ...prev,
-                    discount_value: parseInt(e.target.value) || 1,
-                  }))
-                }
-              />
-            )}
+                  {/* Если Free Drink, показываем поле для кол-ва напитков */}
+                  {massGenerationData.discount_type === 'free_drink' && (
+                    <input
+                      className="w-full p-2 border border-gray-300 rounded"
+                      type="number"
+                      placeholder="Number of Free Drinks"
+                      value={massGenerationData.discount_value}
+                      onChange={(e) =>
+                        setMassGenerationData((prev) => ({
+                          ...prev,
+                          discount_value: parseInt(e.target.value) || 1,
+                        }))
+                      }
+                    />
+                  )}
 
-            {/* Single use */}
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                checked={massGenerationData.is_single_use}
-                onChange={(e) =>
-                  setMassGenerationData((prev) => ({
-                    ...prev,
-                    is_single_use: e.target.checked,
-                  }))
-                }
-                className="mr-2"
-              />
-              <span>Single Use</span>
-            </label>
+                  {/* Single use */}
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={massGenerationData.is_single_use}
+                      onChange={(e) =>
+                        setMassGenerationData((prev) => ({
+                          ...prev,
+                          is_single_use: e.target.checked,
+                        }))
+                      }
+                      className="mr-2"
+                    />
+                    <span>Single Use</span>
+                  </label>
 
-            {/* Renewable Monthly */}
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                checked={massGenerationData.is_renewable}
-                onChange={handleRenewableChangeMassGen}
-                className="mr-2"
-              />
-              <span>Renewable Monthly</span>
-            </label>
+                  {/* Renewable Monthly */}
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={massGenerationData.is_renewable}
+                      onChange={handleRenewableChangeMassGen}
+                      className="mr-2"
+                    />
+                    <span>Renewable Monthly</span>
+                  </label>
 
-            {/* Дата истечения (если не renewable) */}
-            {!massGenerationData.is_renewable && (
-              <input
-                className="w-full p-2 border border-gray-300 rounded"
-                type="datetime-local"
-                placeholder="Expiration Date (optional)"
-                value={massGenerationData.expiration_date}
-                onChange={(e) =>
-                  setMassGenerationData((prev) => ({
-                    ...prev,
-                    expiration_date: e.target.value,
-                  }))
-                }
-              />
-            )}
-            
-            <label className="block text-sm font-medium text-gray-700">
-              Machines for this Mass Generation
-            </label>
-            <MachinesSelector onChange={setTempSelectedMachines} />
-            <div className="flex justify-end space-x-4">
-              <button
-                type="button"
-                onClick={() => setShowMassGeneration(false)}
-                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
-                Generate
-              </button>
+                  {/* Дата истечения (если не renewable) */}
+                  {!massGenerationData.is_renewable && (
+                    <input
+                      className="w-full p-2 border border-gray-300 rounded"
+                      type="datetime-local"
+                      placeholder="Expiration Date (optional)"
+                      value={massGenerationData.expiration_date}
+                      onChange={(e) =>
+                        setMassGenerationData((prev) => ({
+                          ...prev,
+                          expiration_date: e.target.value,
+                        }))
+                      }
+                    />
+                  )}
+                  
+                  <label className="block text-sm font-medium text-gray-700">
+                    Machines for this Mass Generation
+                  </label>
+                  <MachinesSelector onChange={setTempSelectedMachines} />
+                </form>
+              </div>
+
+              {/* Фиксированный футер */}
+              <div className="border-t border-gray-200 p-6 flex justify-end space-x-4">
+                <button
+                  type="button"
+                  onClick={() => setShowMassGeneration(false)}
+                  className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleMassGeneration}
+                  type="submit"
+                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                >
+                  Generate
+                </button>
+              </div>
             </div>
-          </form>
+          </div>
         </div>
       </div>
     )}

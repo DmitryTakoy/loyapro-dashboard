@@ -1,0 +1,86 @@
+sm_pb_8rhfQPH7kn9ldIQJXzoYW5PoS7RL7m
+
+2799c834-46bc-4fc8-9bc8-76e84f1569ba
+
+   http://91.236.196.187/verify-email/JitgOriUwPkf_OWWzCaRpEYMBsOQcVNyI_Tm-39RxqI
+
+
+server {
+    listen 80;
+    server_name 91.236.196.187; # ваш IP
+
+    location / {
+        proxy_pass http://localhost:3000; # порт фронтенда
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+       # Проксирование API-запросов к бэкенду
+    location /api {
+        proxy_pass http://localhost:5000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}
+
+инит : "def create_app(config_name='default'):
+    app = Flask(__name__, template_folder='../templates', static_folder='../static')
+    
+    from config import config
+    app.config.from_object(config[config_name])
+
+    app.config['JWT_SECRET_KEY'] = 'p0101527'  # Задайте секретный ключ
+    jwt.init_app(app)
+
+
+    CORS(app, resources={
+        r"/api/*": {
+            "origins": ["http://91.236.196.187", "http://91.236.196.187:3000", "http://localhost:3000"],
+            "methods": ["GET", "POST", "OPTIONS", "PUT", "DELETE"],
+            "allow_headers": ["Content-Type", "Authorization", "x-organization-key", "x-user-id"],
+            "supports_credentials": True
+        }
+    })
+    "
+
+@auth_bp.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    
+    if not data.get('email') or not data.get('password'):
+        return jsonify({'error': 'Missing email or password'}), 400
+    
+    user = User.query.filter_by(email=data['email'].lower()).first()
+    
+    if not user or not user.check_password(data['password']):
+        return jsonify({'error': 'Invalid email or password'}), 401
+    
+    if not user.email_verified:
+        return jsonify({'error': 'Please verify your email first'}), 403
+    
+    # Обновляем время последнего входа
+    user.last_login = datetime.utcnow()
+    db.session.commit()
+    
+    token = create_access_token(identity=user.id)
+    return jsonify({
+        'token': token,
+        'user': {
+            'email': user.email,
+            'verified': user.email_verified
+        }
+    }), 200
+
+axios "import axios from 'axios';
+
+const api = axios.create({
+  baseURL: 'http://91.236.196.187:5000',
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  },
+  timeout: 10000,
+  withCredentials: true
+});
+"
